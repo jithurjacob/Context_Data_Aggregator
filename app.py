@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 # from flask_cors import CORS, cross_origin
 import holidayapi, time
 from datetime import datetime
+import requests
 hapi = holidayapi.v1('5605610e-feb0-490b-b32b-b32184c13c89')
 app = Flask(__name__)
 
@@ -37,6 +38,12 @@ def getHolidayData():
     holidays = [{holiday.replace("2016","2017"):value[0]["name"]} for holiday,value in holidays.items() if (datetime.strptime(holiday.replace("2016","2017"), "%Y-%m-%d").date()) >= datetime.today().date()]
         
     return jsonify(holidays =holidays)
+
+@app.route('/proxy')
+def proxy():
+    url = request.args.get("url").replace("$","&")
+    print(url)
+    return jsonify(requests.get(url).json())
 
 @app.route('/')
 def index():

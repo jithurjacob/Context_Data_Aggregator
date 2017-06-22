@@ -176,7 +176,7 @@
         function getWeatherDataByPosition(latitude, longitude) {
             $("#data_latitude").text("Latitude: " + latitude);
             $("#data_longitude").text("Longitude: " + longitude);
-            $.getJSON("https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&appid=ad2247ba2cfdae20f476a9f1c8a37636&units=metric",
+            $.getJSON("/proxy?url=http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "$lon=" + longitude + "$appid=ad2247ba2cfdae20f476a9f1c8a37636$units=metric",
                 function(data) {
                     getHolidayData(data.sys.country);
                     var cityName = data.name + ", " + data.sys.country || 'Unknown';
