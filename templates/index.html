@@ -71,31 +71,52 @@
         </div>
     </div>
     <script>
-        // key: "AIzaSyBat35KVOZltFVHffPP4k8u7JrDCmNGO2E"
+        
 
 
         $(document).ready(function () {
-            if (navigator.geolocation) {               
-                navigator.geolocation.getCurrentPosition(function (position) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {                    
+                    getLocationByLatLong(position.coords.latitude, position.coords.longitude);
                     getWeatherDataByPosition(position.latitude, position.longitude);
                 }, function () {
                     getLocationByIP();
                 });
             } else { // hTML 5 API is diabled so try geo from IP
                 getLocationByIP();
-            } 
+            }
             $(".new_quote").on("click", function () {
 
             });
         });
+        function getLocationByLatLong(latitude, longitude) {            
+                $("#data_latitude").text("Latitude: " + latitude);
+                $("#data_longitude").text("Longitude: " + longitude);
+            var geocodingAPI = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+latitude+","+longitude+"&key=AIzaSyBat35KVOZltFVHffPP4k8u7JrDCmNGO2E";
+            $.getJSON(geocodingAPI, function (json) {
+                if (json.status == "OK") {
+                    //Check result 0
+                    var result = json.results[0];
+                    //look for locality tag and administrative_area_level_1
+                    var city = "Unknown";                    
+                    for (var i = 0, len = result.address_components.length; i < len; i++) {
+                        var ac = result.address_components[i];
+                        if (ac.types.indexOf("administrative_area_level_2") >= 0) 
+                            city = ac.long_name || 'Unknown';
+                    }                    
+                    $("#data_location").text("City: " + city);
+                }
+            });
+        }
         function getLocationByIP() {
-            geoip2.city(function (geoipResponse) { 
-                console.log(geoipResponse); 
+            geoip2.city(function (geoipResponse) {
+                //console.log(geoipResponse);
                 var cityName = geoipResponse.city.names.en || 'Unknown';
-                $("#data_location").text("City: "+cityName);
-                $("#data_latitude").text("Latitude: "+geoipResponse.location.latitude);
-                $("#data_longitude").text("Longtude: "+geoipResponse.location.longitude);
-                getWeatherDataByPosition(geoipResponse.location.latitude, geoipResponse.location.longitude) }, function () { alert("Unable to detect your location"); });
+                $("#data_location").text("City: " + cityName);
+                $("#data_latitude").text("Latitude: " + geoipResponse.location.latitude);
+                $("#data_longitude").text("Longitude: " + geoipResponse.location.longitude);
+                getWeatherDataByPosition(geoipResponse.location.latitude, geoipResponse.location.longitude)
+            }, function () { alert("Unable to detect your location"); });
         }
         function getWeatherDataByPosition(latitude, longitude) {
             $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=ad2247ba2cfdae20f476a9f1c8a37636",
