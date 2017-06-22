@@ -150,7 +150,9 @@
 
                 <hr>
                 <h4 class="text-center">Holiday Data</h4>
-                <h4 id="data_holidays"></h4>
+                <div id="data_holidays">
+
+                </div>
             </div>
         </div>
     </div>
@@ -194,6 +196,10 @@
                 data:{"countryCode":countryCode},
                 success:function(data){
                     console.log(data);
+                    data.holidays.forEach(function(elem) {
+                        var key =Object.keys(elem)[0];
+                        $("#data_holidays").append("<h4>"+key+" : "+elem[key]+"</h4>");
+                    }, this);
                 }
             })
         }
