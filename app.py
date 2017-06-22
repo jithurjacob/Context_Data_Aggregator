@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 # from flask_cors import CORS, cross_origin
-import holidayapi, time
+import holidayapi
+import time
 from datetime import datetime
 import requests
 hapi = holidayapi.v1('5605610e-feb0-490b-b32b-b32184c13c89')
