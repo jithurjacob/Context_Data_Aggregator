@@ -3,7 +3,10 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-
+@app.route('/getWeatherData', methods=['POST'])
+def getWeatherData():
+    latitude, longitude, cityName = request.form.get("latitude",None), request.form.get("longitude",None), request.form.get("cityName",None)
+    return "none"
 @app.route('/')
 def index():
     return render_template('index.html')

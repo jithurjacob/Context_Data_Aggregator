@@ -6,8 +6,7 @@
     <title>Customer Context Data</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-        crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -48,6 +47,76 @@
         .margin-right-4 {
             margin-right: 4px;
         }
+        /* The switch - the box around the slider */
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        /* Hide default HTML checkbox */
+
+        .switch input {
+            display: none;
+        }
+        /* The slider */
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+        /* Rounded sliders */
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .inline {
+            display: inline;
+            vertical-align: middle;
+        }
+
+        .switch {
+            vertical-align: middle;
+        }
     </style>
 </head>
 
@@ -56,6 +125,15 @@
         <div class="row vertical">
             <div class="col-xs-12 col-sm-6 col-md-6 col-sm-offset-3 col-md-offset-3   quote-container">
                 <h2 class="text-center">Customer Context Data</h2>
+                <hr/>
+                <!-- Rounded switch -->
+                <div class="text-center">
+                    <h4 class="text-center inline_">Real Time Data</h4>
+                    <label class="switch text-center">
+                    <input type="checkbox" checked>
+                    <div class="slider round"></div>
+                </label>
+                </div>
                 <hr>
                 <h4 class="text-center">Location Data</h4>
                 <h4 id="data_location"></h4>
@@ -63,7 +141,13 @@
                 <h4 id="data_longitude"></h4>
                 <hr>
                 <h4 class="text-center">Weather Data</h4>
+                <div class="inline">
+                    <img class="inline" id="data_weather_image" src="https://openweathermap.org/img/w/02n.png">
+                    <h4 class="inline" id="data_temperature"></h4>
+                </div>
                 <h4 id="data_weather"></h4>
+                <h4 id="data_latitude"></h4>
+
                 <hr>
                 <h4 class="text-center">Holiday Data</h4>
                 <h4 id="data_holidays"></h4>
@@ -71,60 +155,83 @@
         </div>
     </div>
     <script>
-        
-//https://holidayapi.com/
+        //https://holidayapi.com/
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {                    
-                    getLocationByLatLong(position.coords.latitude, position.coords.longitude);
-                    getWeatherDataByPosition(position.latitude, position.longitude);
-                }, function () {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    //getLocationByLatLong(position.coords.latitude, position.coords.longitude);
+                    getWeatherDataByPosition(position.coords.latitude, position.coords.longitude);
+                }, function() {
                     getLocationByIP();
                 });
             } else { // hTML 5 API is diabled so try geo from IP
                 getLocationByIP();
             }
-            $(".new_quote").on("click", function () {
+            $(".new_quote").on("click", function() {
 
             });
         });
-        function getLocationByLatLong(latitude, longitude) {            
-                $("#data_latitude").text("Latitude: " + latitude);
-                $("#data_longitude").text("Longitude: " + longitude);
-            var geocodingAPI = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+latitude+","+longitude+"&key=AIzaSyBat35KVOZltFVHffPP4k8u7JrDCmNGO2E";
-            $.getJSON(geocodingAPI, function (json) {
-                if (json.status == "OK") {
-                    //Check result 0
-                    var result = json.results[0];
-                    //look for locality tag and administrative_area_level_1
-                    var city = "Unknown";                    
-                    for (var i = 0, len = result.address_components.length; i < len; i++) {
-                        var ac = result.address_components[i];
-                        if (ac.types.indexOf("administrative_area_level_2") >= 0) 
-                            city = ac.long_name || 'Unknown';
-                    }                    
-                    $("#data_location").text("City: " + city);
+
+        function getWeatherDataByPosition(latitude, longitude) {
+            $("#data_latitude").text("Latitude: " + latitude);
+            $("#data_longitude").text("Longitude: " + longitude);
+            $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&appid=ad2247ba2cfdae20f476a9f1c8a37636&units=metric",
+                function(data) {
+                    var cityName = data.name + ", " + data.sys.country || 'Unknown';
+                    $("#data_location").text("City: " + cityName);
+                    $("#data_weather_image").attr("src","https://openweathermap.org/img/w/"+data.weather[0].icon+".png")
+                    $("#data_temperature").text(data.main.temp+"°C with "+data.weather[0].description);
+                    console.log(data);
                 }
-            });
+            )
         }
+
+        
         function getLocationByIP() {
-            geoip2.city(function (geoipResponse) {
+            geoip2.city(function(geoipResponse) {
                 //console.log(geoipResponse);
                 var cityName = geoipResponse.city.names.en || 'Unknown';
                 $("#data_location").text("City: " + cityName);
                 $("#data_latitude").text("Latitude: " + geoipResponse.location.latitude);
                 $("#data_longitude").text("Longitude: " + geoipResponse.location.longitude);
                 getWeatherDataByPosition(geoipResponse.location.latitude, geoipResponse.location.longitude)
-            }, function () { alert("Unable to detect your location"); });
+            }, function() {
+                alert("Unable to detect your location");
+            });
         }
-        function getWeatherDataByPosition(latitude, longitude) {
-            $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=ad2247ba2cfdae20f476a9f1c8a37636",
-                function (data) {
+
+        function getWeatherDataForecastByPosition(latitude, longitude) {
+            $("#data_latitude").text("Latitude: " + latitude);
+            $("#data_longitude").text("Longitude: " + longitude);
+            $.getJSON("http://api.openweathermap.org/data/2.5/forecast?lat=" + latitude + "&lon=" + longitude + "&appid=ad2247ba2cfdae20f476a9f1c8a37636&units=metric",
+                function(data) {
+                    var cityName = data.city.name + ", " + data.city.country || 'Unknown';
+                    $("#data_location").text("City: " + cityName);
                     console.log(data);
                 }
             )
         }
+
+         // function getLocationByLatLong(latitude, longitude) {
+        //     $("#data_latitude").text("Latitude: " + latitude);
+        //     $("#data_longitude").text("Longitude: " + longitude);
+        //     var geocodingAPI = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=AIzaSyBat35KVOZltFVHffPP4k8u7JrDCmNGO2E";
+        //     $.getJSON(geocodingAPI, function(json) {
+        //         if (json.status == "OK") {
+        //             //Check result 0
+        //             var result = json.results[0];
+        //             //look for locality tag and administrative_area_level_1
+        //             var city = "Unknown";
+        //             for (var i = 0, len = result.address_components.length; i < len; i++) {
+        //                 var ac = result.address_components[i];
+        //                 if (ac.types.indexOf("administrative_area_level_2") >= 0)
+        //                     city = ac.long_name || 'Unknown';
+        //             }
+        //             $("#data_location").text("City: " + city);
+        //         }
+        //     });
+        // }
     </script>
 
 </body>
